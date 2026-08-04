@@ -1,0 +1,29 @@
+Flights API loaded.
+Accommodations loaded.
+Restaurants loaded from ../database/restaurants/clean_restaurant_2022.csv with compact empirical meal dwell defaults.
+GoogleDistanceMatrix loaded.
+Attractions loaded from ../database/attractions/attractions.csv with compact DBSCAN dwell guidance.
+Flights API loaded.
+Accommodations loaded.
+Restaurants loaded from ../database/restaurants/clean_restaurant_2022.csv with compact empirical meal dwell defaults.
+GoogleDistanceMatrix loaded.
+Attractions loaded from ../database/attractions/attractions.csv with compact DBSCAN dwell guidance.
+Chosen Accommodation in Appleton can not be parsed, '-' will be used instead.
+On the flight can not be parsed, '-' will be used instead.
+Cozy Retreat in Uptown Charlotte can not be parsed, '-' will be used instead.
+Affordable Stay in Los Angeles can not be parsed, '-' will be used instead.
+Affordable Stay in San Francisco can not be parsed, '-' will be used instead.
+Affordable Stay in San Diego can not be parsed, '-' will be used instead.
+Stay at the same chosen accommodation in Minneapolis can not be parsed, '-' will be used instead.
+Stay at the same chosen accommodation in Duluth can not be parsed, '-' will be used instead.
+Stay at the same chosen accommodation in Bemidji can not be parsed, '-' will be used instead.
+No valid information can not be parsed, '-' will be used instead.
+Delivery Rate: 95.0%
+Commonsense Constraint Micro Pass Rate: 63.5%
+Commonsense Constraint Macro Pass Rate: 0.0%
+Hard Constraint Micro Pass Rate: 5.0%
+Hard Constraint Macro Pass Rate: 2.0%
+Final Pass Rate: 0.0%
+------------------
+{'Commonsense Constraint': {'easy': {3: {'Reasonable City Route': {'true': 4, 'false': 16, 'total': 20}, 'Diverse Restaurants': {'true': 18, 'false': 2, 'total': 20}, 'Diverse Attractions': {'true': 20, 'false': 0, 'total': 20}, 'Minimum Nights Stay': {'true': 14, 'false': 6, 'total': 20}, 'Non-conf. Transportation': {'true': 20, 'false': 0, 'total': 20}, 'Within Current City': {'true': 18, 'false': 2, 'total': 20}, 'Within Sandbox': {'true': 3, 'false': 17, 'total': 20}, 'Complete Information': {'true': 6, 'false': 14, 'total': 20}}, 5: {'Reasonable City Route': {'true': 8, 'false': 11, 'total': 20}, 'Diverse Restaurants': {'true': 12, 'false': 7, 'total': 20}, 'Diverse Attractions': {'true': 19, 'false': 0, 'total': 20}, 'Minimum Nights Stay': {'true': 13, 'false': 6, 'total': 20}, 'Non-conf. Transportation': {'true': 17, 'false': 2, 'total': 20}, 'Within Current City': {'true': 13, 'false': 6, 'total': 20}, 'Within Sandbox': {'true': 1, 'false': 18, 'total': 20}, 'Complete Information': {'true': 11, 'false': 8, 'total': 20}}, 7: {'Reasonable City Route': {'true': 7, 'false': 11, 'total': 20}, 'Diverse Restaurants': {'true': 15, 'false': 3, 'total': 20}, 'Diverse Attractions': {'true': 18, 'false': 0, 'total': 20}, 'Minimum Nights Stay': {'true': 14, 'false': 4, 'total': 20}, 'Non-conf. Transportation': {'true': 17, 'false': 1, 'total': 20}, 'Within Current City': {'true': 10, 'false': 8, 'total': 20}, 'Within Sandbox': {'true': 0, 'false': 18, 'total': 20}, 'Complete Information': {'true': 10, 'false': 8, 'total': 20}}}, 'medium': {3: {'Reasonable City Route': {'true': 17, 'false': 3, 'total': 20}, 'Diverse Restaurants': {'true': 17, 'false': 3, 'total': 20}, 'Diverse Attractions': {'true': 20, 'false': 0, 'total': 20}, 'Minimum Nights Stay': {'true': 14, 'false': 6, 'total': 20}, 'Non-conf. Transportation': {'true': 20, 'false': 0, 'total': 20}, 'Within Current City': {'true': 18, 'false': 2, 'total': 20}, 'Within Sandbox': {'true': 0, 'false': 20, 'total': 20}, 'Complete Information': {'true': 14, 'false': 6, 'total': 20}}, 5: {'Reasonable City Route': {'true': 10, 'false': 8, 'total': 20}, 'Diverse Restaurants': {'true': 17, 'false': 1, 'total': 20}, 'Diverse Attractions': {'true': 18, 'false': 0, 'total': 20}, 'Minimum Nights Stay': {'true': 9, 'false': 9, 'total': 20}, 'Non-conf. Transportation': {'true': 18, 'false': 0, 'total': 20}, 'Within Current City': {'true': 14, 'false': 4, 'total': 20}, 'Within Sandbox': {'true': 1, 'false': 17, 'total': 20}, 'Complete Information': {'true': 13, 'false': 5, 'total': 20}}, 7: {}}, 'hard': {3: {}, 5: {}, 7: {}}}, 'Hard Constraint': {'easy': {3: {'Cuisine': {'true': 0, 'false': 0, 'total': 0}, 'Room Rule': {'true': 0, 'false': 0, 'total': 0}, 'Transportation': {'true': 0, 'false': 0, 'total': 0}, 'Room Type': {'true': 0, 'false': 0, 'total': 0}, 'Budget': {'true': 1, 'false': 0, 'total': 20}}, 5: {}, 7: {}}, 'medium': {3: {}, 5: {'Cuisine': {'true': 1, 'false': 0, 'total': 8}, 'Room Rule': {'true': 0, 'false': 0, 'total': 6}, 'Transportation': {'true': 0, 'false': 0, 'total': 0}, 'Room Type': {'true': 0, 'false': 0, 'total': 6}, 'Budget': {'true': 1, 'false': 0, 'total': 20}}, 7: {}}, 'hard': {3: {}, 5: {}, 7: {}}}}
+------------------

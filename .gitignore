@@ -1,0 +1,135 @@
+# ============================================================
+# Python
+# ============================================================
+
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyd
+*.so
+
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ============================================================
+# Virtual environments
+# ============================================================
+
+venv/
+.venv/
+env/
+ENV/
+conda-env/
+
+# ============================================================
+# Secrets and local configuration
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+*.key
+*.pem
+
+# ============================================================
+# Jupyter
+# ============================================================
+
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# ============================================================
+# Operating-system files
+# ============================================================
+
+.DS_Store
+**/.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
+
+# ============================================================
+# Large TravelPlanner database files
+# Download separately according to README instructions
+# ============================================================
+
+database/accommodations/
+database/attractions/
+database/background/
+database/flights/
+database/googleDistanceMatrix/
+database/restaurants/
+
+# ============================================================
+# Raw and processed dwell-time datasets
+# ============================================================
+
+dwell_model/data/
+dwell_model/int/
+dwell_model/outputs/
+
+dwell_model/adjusted_dwell_model_pipeline/data/
+dwell_model/adjusted_dwell_model_pipeline/dbscan_episode_dwell/
+dwell_model/adjusted_dwell_model_pipeline/model_outputs/
+dwell_model/adjusted_dwell_model_pipeline/model_comparison_outputs/
+
+# ============================================================
+# API and geographic caches
+# ============================================================
+
+dwell_model/adjusted_dwell_model_pipeline/osm_cache/
+dwell_model/adjusted_dwell_model_pipeline/travelplanner_enrichment_cache/
+dwell_model/adjusted_dwell_model_pipeline/travelplanner_osm_cache/
+
+**/google_cache.json
+**/google_places_cache.jsonl
+**/osm_cache.json
+**/osm_cache.jsonl
+**/osm_context_*_tile_*.json
+
+# ============================================================
+# Trained models and binary artifacts
+# Host these externally
+# ============================================================
+
+*.joblib
+*.pkl
+*.pickle
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.onnx
+
+# ============================================================
+# Generated plans and evaluation outputs
+# ============================================================
+
+outputs/
+outputs_*/
+demo_outputs_*/
+
+evaluation_output/
+evaluation_output_*/
+demo_evaluation_output_*/
+
+submissions_*/
+
+temporal_eval_outputs_*/
+temporal_commonsense_outputs_*/
+raw_output_behavior_analysis/
+
+# ============================================================
+# Temporary files and logs
+# ============================================================
+
+tmp/
+tmp_*/
+**/tmp/
+
+*.log
+*.tmp
+*.bak

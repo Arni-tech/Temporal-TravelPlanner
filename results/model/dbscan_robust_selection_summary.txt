@@ -1,0 +1,38 @@
+DBSCAN Episode-Based Dwell Model Selection Summary
+============================================================
+
+Dataset:
+Rows used: 1614
+Train rows: 1291
+Test rows: 323
+Target: median_adjusted_dwell_minutes
+Weighting: sqrt(obs_count)
+
+Leakage control:
+Only Google/OSM/POI descriptor features were used as predictors. DBSCAN trajectory diagnostics and dwell-label columns were excluded from the feature set.
+
+Selection rule:
+The final model was selected using the lowest cross-validated MAE on the training set. The holdout test set was used only for final evaluation, not for selecting hyperparameters.
+
+Selected model: random_forest
+Best parameters: {"model__max_depth": null, "model__max_features": "sqrt", "model__min_samples_leaf": 2, "model__n_estimators": 400}
+CV mean MAE: 21.1083
+CV std MAE: 0.9905
+Test MAE: 22.0093
+Test RMSE: 27.2335
+Test R2: 0.1731
+Test weighted MAE: 18.4721
+
+Baseline comparison:
+Dummy median test MAE: 23.8383
+Selected model test MAE: 22.0093
+MAE improvement over dummy: 1.8290 minutes
+
+All model metrics:
+                 model  is_baseline  supports_sample_weight                                                                                                                                         best_params  cv_mean_mae  cv_std_mae  train_mae  test_mae  train_rmse  test_rmse  train_r2   test_r2  train_weighted_mae  test_weighted_mae  generalization_gap_mae failure_reason  selected_final_model
+          dummy_median         True                   False                                                                                                                                                  {}          NaN         NaN  24.244664 23.838309   31.418394  29.989558 -0.010782 -0.002747           22.235173          20.765360               -0.406355            NaN                 False
+                 ridge        False                    True                                                                                                                              {"model__alpha": 50.0}    21.215290    0.786315  19.840134 22.511761   26.150822  28.082291  0.299739  0.120742           16.498315          18.547399                2.671627                                False
+                 huber        False                    True                                                                                                       {"model__alpha": 0.01, "model__epsilon": 2.0}    21.789092    0.599288  19.223874 23.461271   26.003086  29.760277  0.307628  0.012527           15.602220          19.298085                4.237397                                False
+         random_forest        False                    True                                 {"model__max_depth": null, "model__max_features": "sqrt", "model__min_samples_leaf": 2, "model__n_estimators": 400}    21.108319    0.990467  13.146315 22.009344   17.642794  27.233470  0.681269  0.173092           10.575071          18.472075                8.863029                                 True
+hist_gradient_boosting        False                    True {"model__l2_regularization": 0.1, "model__learning_rate": 0.05, "model__max_iter": 150, "model__max_leaf_nodes": 31, "model__min_samples_leaf": 20}    21.499573    1.076946  16.299018 22.227387   21.608372  27.644758  0.521884  0.147927           12.647148          18.868163                5.928369                                False
+                   mlp        False                   False                                                      {"model__alpha": 0.001, "model__hidden_layer_sizes": [64], "model__learning_rate_init": 0.001}    21.850628    0.685713  19.824268 22.623964   26.017188  27.952748  0.306877  0.128835           17.569060          19.006329                2.799696                                False

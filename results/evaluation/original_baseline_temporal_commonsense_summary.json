@@ -1,0 +1,13 @@
+{
+    "Temporal Commonsense Micro Pass Rate (%)": 81.18657298985168,
+    "Temporal Commonsense Macro Pass Rate (%)": 15.789473684210526,
+    "Temporal Commonsense Evaluated Plans": 95,
+    "Temporal Commonsense Evaluated Days": 427,
+    "Attraction Temporal Feasibility Pass Rate (%)": 96.25292740046838,
+    "Full-Day Temporal Feasibility Pass Rate (%)": 84.5433255269321,
+    "Feasible-Complete Day Pass Rate (%)": 62.76346604215457,
+    "Balanced Day Rate (%)": 59.71896955503513,
+    "Under-planned Day Rate (%)": 9.367681498829041,
+    "Mean Temporal Utilisation Ratio": 0.6723603917777179,
+    "Mean Attraction Utilisation Ratio": 0.2882710088981804
+}
