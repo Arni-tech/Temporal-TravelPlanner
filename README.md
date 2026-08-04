@@ -1,192 +1,598 @@
-<h1 align="center">TravelPlanner<br> A Benchmark for Real-World Planning<br> with Language Agents </h1>
+Temporal-TravelPlanner
 
-![Travel Planner](https://img.shields.io/badge/Task-Planning-blue)
-![Travel Planner](https://img.shields.io/badge/Task-Tool_Use-blue) 
-![Travel Planner](https://img.shields.io/badge/Task-Language_Agents-blue)  
-![GPT-4](https://img.shields.io/badge/Model-GPT--4-green) 
-![LLMs](https://img.shields.io/badge/Model-LLMs-green)
+Dwell-Time-Aware Itinerary Feasibility Evaluation
 
-<p align="center">
-    <img src="images/icon.png" width="10%"> <br>
-</p>
+Temporal-TravelPlanner is a research extension of TravelPlanner that evaluates AI-generated travel itineraries as time-constrained daily schedules, not only as coherent collections of travel entities.
 
-Code for the Paper "[TravelPlanner: A Benchmark for Real-World Planning with Language Agents](http://arxiv.org/abs/2402.01622)".
+The project addresses a specific limitation in TravelPlanner-style evaluation: a generated itinerary may contain plausible attractions, meals, transport, and accommodation while still being impractical once the expected time spent at each attraction is included. Temporal-TravelPlanner makes attraction dwell time explicit during planning and adds a duration-budget evaluation layer for measuring day-level and complete-itinerary feasibility.
 
-![Demo Video GIF](images/TravelPlanner.gif)
+This repository accompanies the master's thesis:
 
-<p align="center">
-[<a href="https://osu-nlp-group.github.io/TravelPlanner/">Website</a>] •
-[<a href="http://arxiv.org/abs/2402.01622">Paper</a>] •
-[<a href="https://huggingface.co/datasets/osunlp/TravelPlanner">Dataset</a>] •
-[<a href="https://github.com/OSU-NLP-Group/TravelPlanner/blob/main/README.md#model-release">Models</a>] •
-[<a href="https://huggingface.co/spaces/osunlp/TravelPlannerLeaderboard">Leaderboard</a>] •
-[<a href="https://huggingface.co/spaces/osunlp/TravelPlannerEnvironment">Environment</a>] •
-[<a href="https://twitter.com/ysu_nlp/status/1754365367294562680">Twitter</a>]
-</p>
+Temporal-TravelPlanner: Dwell-Time-Aware Itinerary Feasibility EvaluationArnav Negi, The University of Queensland, 2026
 
-## Updates
+Why Temporal-TravelPlanner?
 
-- 2024/10/23: Release the [models](https://github.com/OSU-NLP-Group/TravelPlanner/blob/main/README.md#model-release) finetuned on TravelPlanner. The data could be found [here](./finetuning_data). We use [LLama-Factory](https://github.com/hiyouga/LLaMA-Factory/blob/main/examples/train_lora/llama3_lora_sft.sh) for fine-tuning.
-- 2024/7/14: Support [reference information](./database) in JSON format.
-- 2024/4/28: Update the [warnings](https://github.com/OSU-NLP-Group/TravelPlanner/tree/main?tab=readme-ov-file#%EF%B8%8Fwarnings), please note that we strictly prohibit any form of cheating.
-- 2024/4/21: Provide [format check tool](./postprocess/format_check.py)  for testset submission files.  You can run it to check if there are any format errors in your file.
+TravelPlanner evaluates language-agent itineraries using delivery, commonsense, hard-constraint, and final pass metrics. These dimensions are important, but they do not fully determine whether a traveller could realistically complete the proposed schedule.
 
-# TravelPlanner
+Temporal-TravelPlanner adds a complementary question:
 
-TravelPlanner is a benchmark crafted for evaluating language agents in tool-use and complex planning within multiple constraints.
+Can the generated itinerary actually fit within the available time after attraction visits, meals, local movement, and transportation are considered?
 
-For a given query, language agents are expected to formulate a comprehensive plan that includes transportation, daily meals, attractions, and accommodation for each day.
+The project therefore focuses on temporal realism rather than claiming a general improvement across every original TravelPlanner benchmark dimension.
 
-For constraints, from the perspective of real world applications, TravelPlanner includes three types of them: Environment Constraint, Commonsense Constraint, and Hard Constraint. 
+Main Contributions
+
+Dwell-time label construction from mobility dataMassive-STEPS semantic check-ins are converted into activity episodes using DBSCAN and aggregated into point-of-interest-level dwell labels.
+
+Supervised attraction dwell-time estimationPOI labels are enriched with Google Places and OpenStreetMap features. Ridge, Huber, Random Forest, Histogram-Based Gradient Boosting, and Multi-Layer Perceptron regressors are compared.
+
+Dwell-aware TravelPlanner integrationPredicted attraction dwell durations and empirical meal-duration estimates are incorporated into the TravelPlanner-style workflow.
+
+Temporal guardrail and evaluation frameworkA deterministic guardrail reduces overloaded attraction schedules, while day-level and plan-level metrics measure temporal feasibility, completeness, balance, under-planning, and temporal commonsense.
+
+System Overview
+
+flowchart LR
+    A[Massive-STEPS check-ins] --> B[DBSCAN activity episodes]
+    B --> C[POI-level dwell labels]
+    C --> D[Google Places and OSM enrichment]
+    D --> E[Random Forest dwell model]
+
+    F[TravelPlanner validation queries] --> G[Baseline plan generation]
+    F --> H[Dwell-aware plan generation]
+    E --> H
+    H --> I[Temporal guardrail]
+
+    G --> J[Original TravelPlanner evaluation]
+    I --> J
+
+    G --> K[Temporal feasibility evaluation]
+    I --> K
+    K --> L[Day-level and plan-level comparison]
+
+The workflow combines two development streams:
+
+a TravelPlanner-style itinerary-generation pipeline; and
+
+a dwell-time modelling pipeline based on semantic trajectory data.
+
+Their outputs are joined during dwell-aware planning and evaluated using both the original benchmark metrics and the proposed temporal metrics.
+
+Dwell-Time Modelling
+
+Data preparation
+
+The dwell-time pipeline was developed from approximately:
+
+Stage
+
+Size
+
+Semantic check-ins
+
+1,322,295
+
+Unique POIs
+
+143,783
+
+Constructed activity episodes
+
+1,022,814
+
+Clean episode-duration observations
+
+117,579
+
+Labelled POIs used for supervised modelling
+
+3,346
+
+Activity regions were constructed using DBSCAN with:
+
+neighbourhood radius: 100 metres
+
+minimum cluster size: 5 observations
+
+The episode-based approach was used to reduce the fragmentation caused by treating every nearby check-in as a separate visit.
+
+Model comparison
+
+Model development used an 80/20 train-test split, with five-fold cross-validation on the training set. Mean Absolute Error in minutes was the primary selection criterion.
+
+Model
+
+CV MAE
+
+Test MAE
+
+Test RMSE
+
+Test R²
+
+Dummy median baseline
+
+-
+
+23.84
+
+29.99
+
+-0.003
+
+Ridge Regression
+
+21.22
+
+22.51
+
+28.08
+
+0.121
+
+Huber Regression
+
+21.79
+
+23.46
+
+29.76
+
+0.013
+
+Random Forest Regression
+
+21.11
+
+22.01
+
+27.23
+
+0.173
+
+Histogram-Based Gradient Boosting
+
+21.50
+
+22.23
+
+27.64
+
+0.148
+
+Multi-Layer Perceptron
+
+21.85
+
+22.62
+
+27.95
+
+0.129
+
+Random Forest Regression was selected because it achieved the strongest overall performance across cross-validated MAE, test MAE, and test RMSE.
+
+The predictions should be interpreted as typical attraction-duration signals, not exact personalised visit durations. Dwell time remains affected by unobserved factors such as personal interest, group size, crowding, weather, queues, attraction scale, and travel pace.
 
 
-## Setup Environment
 
-1. Create a conda environment and install dependencies:
-```bash
-conda create -n travelplanner python=3.9
-conda activate travelplanner
+
+
+Temporal Evaluation
+
+For each itinerary day, the evaluator accumulates:
+
+attraction dwell time;
+
+estimated local movement;
+
+empirical meal durations; and
+
+transportation duration recorded in the generated plan.
+
+The resulting full-day load is compared with a day-type budget:
+
+Day type
+
+Time budget
+
+Full destination day
+
+600 minutes
+
+Travel day
+
+480 minutes
+
+Return travel day
+
+360 minutes
+
+A day is feasible when its estimated full-day load does not exceed its assigned budget. A complete itinerary is feasible only when every evaluated day is feasible.
+
+The evaluation also measures:
+
+overloaded day rate;
+
+overload duration;
+
+feasible-complete day and plan rates;
+
+temporal utilisation;
+
+balanced day rate;
+
+under-planned day rate;
+
+Temporal Commonsense Micro; and
+
+Temporal Commonsense Macro.
+
+Macro evaluation is deliberately strict: one unrealistic day can cause the complete itinerary to fail.
+
+Experimental Setup
+
+The final experiment compared two conditions over a 100-query TravelPlanner validation subset:
+
+Baseline
+
+The original TravelPlanner-style workflow without attraction-level dwell predictions or the temporal guardrail.
+
+Dwell-aware Temporal-TravelPlanner
+
+The modified workflow using:
+
+predicted attraction dwell durations;
+
+empirical meal-duration estimates; and
+
+a deterministic attraction-load guardrail.
+
+Results are reported over successfully parsed and evaluated outputs:
+
+Condition
+
+Evaluable plans
+
+Evaluated days
+
+Baseline
+
+95
+
+427
+
+Dwell-aware
+
+90
+
+394
+
+Because the number of evaluable plans differs, the results should be interpreted as a comparison over processable outputs rather than a perfectly matched set of identical plans.
+
+Results
+
+Original TravelPlanner evaluation
+
+The dwell-aware system did not improve the original benchmark metrics.
+
+Metric
+
+Baseline
+
+Dwell-aware
+
+Delivery rate
+
+95.00%
+
+90.00%
+
+Commonsense constraint micro pass rate
+
+63.50%
+
+61.88%
+
+Commonsense constraint macro pass rate
+
+0.00%
+
+0.00%
+
+Hard constraint micro pass rate
+
+5.00%
+
+1.00%
+
+Hard constraint macro pass rate
+
+2.00%
+
+1.00%
+
+Final pass rate
+
+0.00%
+
+0.00%
+
+This is an important boundary of the work: Temporal-TravelPlanner targets temporal executability, not every dimension of the original benchmark.
+
+Temporal feasibility
+
+Metric
+
+Baseline
+
+Dwell-aware
+
+Full-day temporal feasibility
+
+84.54%
+
+97.46%
+
+Full-plan temporal feasibility
+
+48.42%
+
+90.00%
+
+Overloaded day rate
+
+15.46%
+
+2.54%
+
+Feasible-complete plan rate
+
+18.95%
+
+86.67%
+
+Temporal commonsense
+
+Metric
+
+Baseline
+
+Dwell-aware
+
+Temporal Commonsense Micro
+
+81.19%
+
+97.21%
+
+Temporal Commonsense Macro
+
+15.79%
+
+86.67%
+
+Attraction temporal feasibility
+
+96.25%
+
+100.00%
+
+Feasible-complete day rate
+
+62.76%
+
+94.16%
+
+Balanced day rate
+
+59.72%
+
+82.74%
+
+Under-planned day rate
+
+9.37%
+
+3.05%
+
+The central finding is that the original TravelPlanner metrics and the proposed temporal metrics capture different dimensions of itinerary quality. The baseline remained slightly stronger under the original benchmark, while the dwell-aware system produced substantially more executable schedules among successfully evaluated outputs.
+
+Repository Structure
+
+Temporal-TravelPlanner/
+├── agents/                         # TravelPlanner-style agent workflow
+├── database/                       # Reference information and data instructions
+├── dwell_model/
+│   ├── src/                        # Earlier enrichment and integration utilities
+│   └── adjusted_dwell_model_pipeline/
+│       └── src/                    # DBSCAN labels, enrichment, training and prediction
+├── evaluation/                     # Original and temporal evaluators
+├── postprocess/                    # Parsing, formatting and plan conversion
+├── results/
+│   ├── evaluation/                 # Final benchmark and temporal summaries
+│   ├── examples/                   # Paired example generated plans
+│   ├── figures/                    # Model-comparison figures
+│   └── model/                      # Selected settings, metrics and metadata
+├── tools/                          # Attractions, restaurants, planner and support APIs
+├── utils/                          # Shared utilities
+├── run_temporal_eval.py
+├── run_temporal_eval_baseline_20.py
+├── temporal_feasibility_evaluation.ipynb
+├── requirements.txt
+└── README.md
+
+Installation
+
+1. Clone the repository
+
+git clone https://github.com/Arni-tech/Temporal-TravelPlanner.git
+cd Temporal-TravelPlanner
+
+2. Create an isolated environment
+
+conda create -n temporal-travelplanner python=3.9
+conda activate temporal-travelplanner
 pip install -r requirements.txt
-```
 
-2. Download the [database](https://drive.google.com/file/d/1pF1Sw6pBmq2sFkJvm-LzJOqrmfWoQgxE/view?usp=drive_link) and unzip it to the `TravelPlanner` directory (i.e., `your/path/TravelPlanner`).
+3. Configure required services
 
-## Running
-### Two-stage Mode
+Different stages of the project use external services for LLM generation, place enrichment, routing, or contextual information. Configure the credentials expected by the relevant scripts in a local environment file or shell session.
 
-In the two-stage mode, language agents are tasked with employing various search tools to gather information.
-Based on the collected information, language agents are expected to deliver a plan that not only meets the user’s needs specified in the query but also adheres to commonsense constraints.
+Do not commit API keys. The repository ignores .env files and common credential formats.
 
-```bash
-export OUTPUT_DIR=path/to/your/output/file
-# We support MODEL in ['gpt-3.5-turbo-X','gpt-4-1106-preview','gemini','mistral-7B-32K','mixtral']
-export MODEL_NAME=MODEL_NAME
-export OPENAI_API_KEY=YOUR_OPENAI_KEY
-# if you do not want to test google models, like gemini, just input "1".
-export GOOGLE_API_KEY=YOUR_GOOGLE_KEY
-# SET_TYPE in ['validation', 'test']
-export SET_TYPE=validation
-cd agents
-python tool_agents.py  --set_type $SET_TYPE --output_dir $OUTPUT_DIR --model_name $MODEL_NAME
-```
-The generated plan will be stored in OUTPUT_DIR/SET_TYPE.
+Data and Model Assets
 
-### Sole-Planning Mode
+The lightweight GitHub repository intentionally excludes:
 
-TravelPlanner also provides an easier mode solely focused on testing their planning ability.
-The sole-planning mode ensures that no crucial information is missed, thereby enabling agents to focus on planning itself.
+raw Massive-STEPS city check-in files;
 
-Please refer to the paper for more details.
+the full TravelPlanner database;
 
-```bash
-export OUTPUT_DIR=path/to/your/output/file
-# We support MODEL in ['gpt-3.5-turbo-X','gpt-4-1106-preview','gemini','mistral-7B-32K','mixtral']
-export MODEL_NAME=MODEL_NAME
-export OPENAI_API_KEY=YOUR_OPENAI_KEY
-# if you do not want to test google models, like gemini, just input "1".
-export GOOGLE_API_KEY=YOUR_GOOGLE_KEY
-# SET_TYPE in ['validation', 'test']
-export SET_TYPE=validation
-# STRATEGY in ['direct','cot','react','reflexion']
-export STRATEGY=direct
+Google Places and OpenStreetMap caches;
 
-cd tools/planner
-python sole_planning.py  --set_type $SET_TYPE --output_dir $OUTPUT_DIR --model_name $MODEL_NAME --strategy $STRATEGY
-```
+intermediate DBSCAN and enrichment tables;
 
-## Postprocess
+trained model binaries;
 
-In order to parse natural language plans, we use gpt-4 to convert these plans into json formats. We encourage developers to try different parsing prompts to obtain better-formatted plans.
+all generated plans from repeated experiments; and
 
-```bash
-export OUTPUT_DIR=path/to/your/output/file
-export MODEL_NAME=MODEL_NAME
-export OPENAI_API_KEY=YOUR_OPENAI_KEY
-export SET_TYPE=validation
-export STRATEGY=direct
-# MODE in ['two-stage','sole-planning']
-export MODE=two-stage
-export TMP_DIR=path/to/tmp/parsed/plan/file
-export SUBMISSION_DIR=path/to/your/evaluation/file
+temporary development outputs.
 
-cd postprocess
-python parsing.py  --set_type $SET_TYPE --output_dir $OUTPUT_DIR --model_name $MODEL_NAME --strategy $STRATEGY --mode $MODE --tmp_dir $TMP_DIR
+The repository retains the core implementation, final metrics, selected settings, example plans, and summary results.
 
-# Then these parsed plans should be stored as the real json formats.
-python element_extraction.py  --set_type $SET_TYPE --output_dir $OUTPUT_DIR --model_name $MODEL_NAME --strategy $STRATEGY --mode $MODE --tmp_dir $TMP_DIR
+Original TravelPlanner data
 
-# Finally, combine these plan files for evaluation. We also provide a evaluation example file "example_evaluation.jsonl" in the postprocess folder.
-python combination.py --set_type $SET_TYPE --output_dir $OUTPUT_DIR --model_name $MODEL_NAME --strategy $STRATEGY --mode $MODE  --submission_file_dir $SUBMISSION_DIR
-```
+Download and arrange the original TravelPlanner database according to the upstream project instructions:
 
-## Evaluation
+OSU-NLP-Group/TravelPlanner
 
-We support the offline validation set evaluation using the provided evaluation script. To avoid data contamination, please use our official [leaderboard](https://huggingface.co/spaces/osunlp/TravelPlannerLeaderboard) for test set evaluation.
+Temporal-TravelPlanner assets
 
-```bash
-export SET_TYPE=validation
-export EVALUATION_FILE_PATH=your/evaluation/file/path
+The processed dwell-time assets and trained model are distributed separately to keep the source repository lightweight.
 
-cd evaluation
-python eval.py --set_type $SET_TYPE --evaluation_file_path $EVALUATION_FILE_PATH
-```
+Asset release status: a download link will be added after the project-specific data/model archive is published.
 
-## ⚠️Warnings
+When available, extract the asset archive into the repository root and preserve the included directory structure.
 
-We release our evaluation scripts to foster innovation and aid the development of new methods.  We encourage the use of evaluation feedback in training set, such as implementing reinforcement learning techniques, to enhance learning. However, we strictly prohibit any form of cheating in the validation and test sets to uphold the fairness and reliability of the benchmark's evaluation process. We reserve the right to disqualify results if we find any of the following violations:
+Reproducing the Evaluation
 
-1. Reverse engineering of our dataset, which includes, but is not limited to:
-   - Converting our natural language queries in the test set to structured formats (e.g., JSON) for optimization and unauthorized evaluation.
-   - Deriving data point entries using the hard rules from our data construction process, without accessing the actual database.
-   - Other similar manipulations.
-2. Hard coding or explicitly writing evaluation cues into prompts by hand, such as direct hints of common sense, which contradicts our goals as it lacks generalizability and is limited to this specific benchmark.
-3. Any other human interference strategies that are tailored specifically to this benchmark but lack generalization capabilities.
+The reported experiment follows this sequence:
 
-(The content above is intended solely for use within the TravelPlanner evaluation framework. Extending and editing our database to create new tasks or benchmarks is permitted, provided that you adhere to the licensing terms.)
+Generate baseline plans for the selected 100 validation queries.
 
-## Load Datasets
+Generate dwell-aware plans using enriched attraction records, empirical meal durations, and the temporal guardrail.
 
-```python
-from datasets import load_dataset
-# "test" can be substituted by "train" or "validation".
-data = load_dataset('osunlp/TravelPlanner','test')['test']
-```
+Postprocess generated outputs into structured itinerary records.
 
-## Model Release
+Run the original TravelPlanner-style evaluation.
 
-We fine-tune **Llama3.1-8B-Instruct** and **Qwen2-7B-Instruct** on TravelPlanner ('sole-planning' mode). The fine-tuned model weights are available on the HuggingFace 🤗.
+Run the temporal feasibility evaluator.
 
-- **[Llama-3.1-8B-Instruct-travelplanner-SFT](https://huggingface.co/hsaest/Llama-3.1-8B-Instruct-travelplanner-SFT)**
-- **[Qwen2-7B-Instruct-travelplanner-SFT](https://huggingface.co/hsaest/Qwen2-7B-Instruct-travelplanner-SFT)**
+Run the temporal commonsense evaluator.
 
-|                    | Commonsense (Micro) | Commonsense (Macro) | Hard (Micro) | Hard (Macro) | Final Pass Rate |
-|--------------------|:-------------------:|:-------------------:|:------------:|:------------:|:---------------:|
-| **Direct Prompting**|                     |                     |              |              |                 |
-| Llama3.1-8B        |        60.1          |         0.0          |      7.9     |      2.8     |       0.0       |
-| Qwen2-7B           |        49.9          |         1.1          |      2.1     |      0.0     |       0.0       |
-| **Fine-tuning** |           |                     |              |              |                 |
-| Llama3.1-8B        |        78.3          |        17.8          |     19.3     |      6.1     |       3.8       |
-| Qwen2-7B           |        59.0          |         0.6          |      0.2     |      0.0     |       0.0       |
+Compare baseline and dwell-aware summary outputs.
 
+Main implementation entry points include:
 
-## Contact
+Purpose
 
-If you have any problems, please contact 
-[Jian Xie](mailto:jianx0321@gmail.com),
-[Kai Zhang](mailto:zhang.13253@osu.edu),
-[Yu Su](mailto:su.809@osu.edu)
+File
 
-## Citation Information
+TravelPlanner-style generation
 
-If our paper or related resources prove valuable to your research, we kindly ask for citation. 
+agents/tool_agents.py
 
-<a href="https://github.com/OSU-NLP-Group/TravelPlanner"><img src="https://img.shields.io/github/stars/OSU-NLP-Group/TravelPlanner?style=social&label=TravelPanner" alt="GitHub Stars"></a>
+Attraction dwell integration
 
-```
-@inproceedings{xie2024travelplanner,
-  title={TravelPlanner: A Benchmark for Real-World Planning with Language Agents},
-  author={Xie, Jian and Zhang, Kai and Chen, Jiangjie and Zhu, Tinghui and Lou, Renze and Tian, Yuandong and Xiao, Yanghua and Su, Yu},
-  booktitle={Forty-first International Conference on Machine Learning},
-  year={2024}
-}
-```
+tools/attractions/apis.py
+
+Restaurant handling
+
+tools/restaurants/apis.py
+
+Temporal guardrail
+
+tools/planner/apis.py
+
+Original benchmark evaluation
+
+evaluation/eval.py
+
+Temporal feasibility
+
+evaluation/temporal_feasibility.py
+
+Temporal commonsense
+
+evaluation/commonsense_constraint_temporal_extension.py
+
+Temporal evaluation runner
+
+run_temporal_eval.py
+
+The exact generation configuration depends on the installed model/API environment and the location of the separately distributed data assets.
+
+Included Evidence
+
+The repository includes compact evidence for the reported experiments:
+
+results/model/ contains the selected DBSCAN setting, final model metadata, comparison metrics, and model-selection summary.
+
+results/evaluation/ contains original benchmark logs and temporal summary files.
+
+results/examples/ contains one baseline and one dwell-aware generated itinerary.
+
+results/figures/ contains model-comparison visualisations.
+
+The complete raw and intermediate experiment directories are excluded from GitHub because they contain repeated plans, API caches, large datasets, and development artifacts that are not required for reviewing the final method and findings.
+
+Limitations
+
+The experiment uses a 100-query subset rather than the full TravelPlanner benchmark.
+
+The two conditions produced different numbers of evaluable plans.
+
+Trajectory-derived dwell labels are proxies rather than controlled entry/exit ground truth.
+
+Predicted dwell times represent typical rather than personalised visitor behaviour.
+
+Daily time budgets are fixed methodological assumptions.
+
+Transportation durations are taken from generated itinerary fields rather than independently verified for every plan.
+
+The guardrail reduces attraction overload but does not fully reschedule or repair meals, transportation, accommodation, or city routing.
+
+Future Work
+
+Future extensions could include:
+
+matched and benchmark-scale evaluation;
+
+itinerary rescheduling and attraction substitution instead of removal;
+
+personalised dwell-time prediction;
+
+opening-hour, queueing, weather, fatigue, and live transport modelling;
+
+human evaluation of comfort and usefulness; and
+
+tighter integration between LLM generation and formal temporal planning or constraint solving.
+
+Citation
+
+Negi, A. (2026). Temporal-TravelPlanner: Dwell-Time-Aware Itinerary
+Feasibility Evaluation. Master's thesis, School of Electrical Engineering
+and Computer Science, The University of Queensland.
+
+Acknowledgements
+
+This project builds on the original TravelPlanner benchmark and uses the Massive-STEPS semantic trajectory dataset as the behavioural foundation for dwell-time modelling.
+
+The implementation also uses or draws contextual information from Google Places, OpenStreetMap, Geoapify, and Open-Meteo.
+
+The thesis was completed under the supervision of Dr Kai Li Lim and Dr Chengbo Zheng at The University of Queensland.
+
+Licence
+
+See LICENSE for the repository licence. This project extends the TravelPlanner-style codebase; users should also comply with the upstream project's licence and the terms associated with external datasets and APIs.
