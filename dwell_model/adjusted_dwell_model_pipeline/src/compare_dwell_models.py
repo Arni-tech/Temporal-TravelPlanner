@@ -1,3 +1,20 @@
+"""
+Train and compare dwell-time prediction models.
+
+Input:
+    Feature-enriched POI training table containing DBSCAN-derived
+    median_adjusted_dwell_minutes labels and Google/OSM features.
+
+Output:
+    - dwell_model_comparison.csv
+    - model comparison plots
+    - selected_dwell_model.joblib
+    - selected_model_metadata.json
+
+This script is the final modelling stage after DBSCAN dwell-label construction
+and Google/OSM feature enrichment.
+"""
+
 from __future__ import annotations
 
 import argparse
