@@ -1,4 +1,5 @@
 import os, sys
+from pathlib import Path
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 
 from commonsense_constraint import evaluation as commonsense_eval
@@ -79,7 +80,16 @@ def paper_term_mapping(commonsense_constraint_record, hard_constraint_record):
     return remap_commonsense, remap_hard
 
 
-def load_queries(set_type):
+def load_queries(set_type, query_file=None):
+    if query_file is not None:
+        return load_line_json_data(query_file)
+
+    project_root = Path(__file__).resolve().parents[1]
+    local_query_file = project_root / "database" / f"{set_type}_ref_info.jsonl"
+
+    if local_query_file.exists():
+        return load_line_json_data(local_query_file)
+
     if set_type == "train":
         return load_dataset("osunlp/TravelPlanner", "train")["train"]
     if set_type == "validation":
@@ -89,8 +99,8 @@ def load_queries(set_type):
 
     raise ValueError(f"Unknown set_type: {set_type}")
 
-def eval_score(set_type: str, file_path: str, num_samples: int = None):
-    query_data_list = [x for x in load_queries(set_type)]
+def eval_score(set_type: str, file_path: str, num_samples: int = None, query_file: str = None):
+    query_data_list = [x for x in load_queries(set_type, query_file=query_file)]
 
     if num_samples is not None:
         query_data_list = query_data_list[:num_samples]
@@ -326,11 +336,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dwell_model_dir",
         type=str,
-        default=r"C:\Users\negia\trip_plan\dwell_model_exports",
+        default="dwell_model_exports",
     )
     parser.add_argument("--temporal_model_name", type=str, default="gpt-3.5-turbo-0125")
     parser.add_argument("--temporal_mode", type=str, default="two-stage")
     parser.add_argument("--temporal_save_dir", type=str, default=None)
+    parser.add_argument("--query_file", type=str, default=None)
 
     args = parser.parse_args()
 
