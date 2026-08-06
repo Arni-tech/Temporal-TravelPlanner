@@ -152,7 +152,7 @@ Macro evaluation is deliberately strict: one unrealistic day can cause the compl
 
 ## Experimental Setup
 
-The final experiment compared two conditions over a **100-query TravelPlanner validation subset**:
+The final experiment compared two conditions over a **100-query TravelPlanner validation subset**.
 
 ### Baseline
 
@@ -267,9 +267,10 @@ pip install -r requirements.txt
 
 Download the project data/model assets from:
 
-> **[Google Drive: Temporal-TravelPlanner Database and Model Assets](https://drive.google.com/drive/folders/1OvFhq4Anb0jZT8cTbOcEqDfD6wWJ_Sya?usp=drive_link)**
+> **[Google Drive: Temporal-TravelPlanner Database and Model Assets](https://drive.google.com/drive/folders/1OvFhq4Anb0jZT8cTbOcEqDfD6wWJ_Sya?usp=sharing)**
 
-Then place the downloaded files according to the structure described in the `Data and Model Assets` section below.
+Then restore the downloaded files according to the structure described in the **Data and Model Assets** section below.
+
 ### 4. Configure required services
 
 Different stages of the project use external services for LLM generation, place enrichment, routing, or contextual information. Configure the credentials expected by the relevant scripts in a local environment file or shell session.
@@ -292,12 +293,6 @@ The lightweight GitHub repository intentionally excludes:
 
 The repository retains the core implementation, final metrics, selected settings, example plans, and summary results.
 
-### Original TravelPlanner data
-
-Download and arrange the original TravelPlanner database according to the upstream project instructions:
-
-- [OSU-NLP-Group/TravelPlanner](https://github.com/OSU-NLP-Group/TravelPlanner)
-
 ### Temporal-TravelPlanner data and model assets
 
 The processed data, trained dwell-time model, and final evaluation outputs are distributed separately to keep the source repository lightweight.
@@ -315,13 +310,139 @@ The Drive folder contains:
 - temporal feasibility and temporal commonsense evaluation outputs; and
 - final logs used for the reported 100-query experiment.
 
-After downloading, place the asset folder in the project root or copy the included folders into the matching repository directories.
-
 Raw Massive-STEPS data is not redistributed in this repository or asset package. It should be obtained from the official source.
+
+### Restoring the asset package into the repository
+
+The Google Drive package is organised for readability. To run the repository code, copy its contents into the matching repository paths.
+
+```text
+01_original_travelplanner_data/*
+→ database/
+
+02_temporal_travelplanner_data/attractions/*
+→ database/attractions/
+
+02_temporal_travelplanner_data/restaurants/*
+→ database/restaurants/
+
+03_dwell_model_files/*
+→ dwell_model/adjusted_dwell_model_pipeline/data/
+
+03_dwell_model_files/best_eps_100m_min_5/*
+→ dwell_model/adjusted_dwell_model_pipeline/data/best_eps_100m_min_5/
+
+03_dwell_model_files/dbscan_model_outputs/*
+→ dwell_model/adjusted_dwell_model_pipeline/data/dbscan_model_outputs/
+
+04_evaluation_outputs/generated_plans/original_baseline_100/*
+→ outputs_original_baseline_100/
+
+04_evaluation_outputs/generated_plans/dwell_dbscan_guardrail_100/*
+→ outputs_dwell_dbscan_guardrail_100/
+
+04_evaluation_outputs/official_submissions/original_baseline_100/*
+→ evaluation_output_original_baseline_100/
+
+04_evaluation_outputs/official_submissions/dwell_dbscan_guardrail_100/*
+→ evaluation_output_dwell_dbscan_guardrail_100/
+
+04_evaluation_outputs/temporal_feasibility/original_baseline_100/*
+→ temporal_eval_outputs_original_baseline_100/
+
+04_evaluation_outputs/temporal_feasibility/dwell_dbscan_guardrail_100/*
+→ temporal_eval_outputs_dwell_dbscan_guardrail_100/
+
+04_evaluation_outputs/temporal_commonsense/original_baseline_100/*
+→ temporal_commonsense_outputs_original_baseline_100/
+
+04_evaluation_outputs/temporal_commonsense/dwell_dbscan_guardrail_100/*
+→ temporal_commonsense_outputs_dwell_dbscan_guardrail_100/
+```
+
+After copying, these paths should exist:
+
+```text
+database/validation_ref_info.jsonl
+database/attractions/attractions_google_osm_features_dbscan_dwell.csv
+database/restaurants/restaurants_dbscan_empirical_dwell.csv
+outputs_original_baseline_100/
+outputs_dwell_dbscan_guardrail_100/
+evaluation_output_original_baseline_100/
+evaluation_output_dwell_dbscan_guardrail_100/
+temporal_eval_outputs_original_baseline_100/
+temporal_eval_outputs_dwell_dbscan_guardrail_100/
+temporal_commonsense_outputs_original_baseline_100/
+temporal_commonsense_outputs_dwell_dbscan_guardrail_100/
+```
 
 ---
 
 ## Reproducing the Evaluation
+
+### Reproduce reported metrics from released outputs
+
+The Google Drive asset package contains the generated baseline and dwell-aware plans used for the reported 100-query experiment.
+
+The commands below use Windows/Anaconda Prompt syntax. On macOS or Linux, replace `^` line continuations with `\`.
+
+To reproduce the original TravelPlanner-style evaluation:
+
+```bash
+python evaluation/eval.py ^
+  --set_type validation ^
+  --query_file database/validation_ref_info.jsonl ^
+  --evaluation_file_path evaluation_output_original_baseline_100/validation_gpt-3.5-turbo-0125_two-stage_submission.jsonl ^
+  --num_samples 100
+
+python evaluation/eval.py ^
+  --set_type validation ^
+  --query_file database/validation_ref_info.jsonl ^
+  --evaluation_file_path evaluation_output_dwell_dbscan_guardrail_100/validation_gpt-3.5-turbo-0125_two-stage_submission.jsonl ^
+  --num_samples 100
+```
+
+To rerun temporal feasibility:
+
+```bash
+python evaluation/eval.py ^
+  --set_type validation ^
+  --query_file database/validation_ref_info.jsonl ^
+  --evaluation_file_path evaluation_output_original_baseline_100/validation_gpt-3.5-turbo-0125_two-stage_submission.jsonl ^
+  --num_samples 100 ^
+  --temporal_eval ^
+  --temporal_output_dir outputs_original_baseline_100 ^
+  --temporal_system_name original_baseline ^
+  --temporal_save_dir temporal_eval_outputs_original_baseline_100
+
+python evaluation/eval.py ^
+  --set_type validation ^
+  --query_file database/validation_ref_info.jsonl ^
+  --evaluation_file_path evaluation_output_dwell_dbscan_guardrail_100/validation_gpt-3.5-turbo-0125_two-stage_submission.jsonl ^
+  --num_samples 100 ^
+  --temporal_eval ^
+  --temporal_output_dir outputs_dwell_dbscan_guardrail_100 ^
+  --temporal_system_name dwell_dbscan_guardrail ^
+  --temporal_save_dir temporal_eval_outputs_dwell_dbscan_guardrail_100
+```
+
+To rerun temporal commonsense:
+
+```bash
+python evaluation/commonsense_constraint_temporal_extension.py ^
+  --temporal_day_details_csv temporal_eval_outputs_original_baseline_100/original_baseline_temporal_day_details.csv ^
+  --save_dir temporal_commonsense_outputs_original_baseline_100 ^
+  --system_name original_baseline
+
+python evaluation/commonsense_constraint_temporal_extension.py ^
+  --temporal_day_details_csv temporal_eval_outputs_dwell_dbscan_guardrail_100/dwell_dbscan_guardrail_temporal_day_details.csv ^
+  --save_dir temporal_commonsense_outputs_dwell_dbscan_guardrail_100 ^
+  --system_name dwell_dbscan_guardrail
+```
+
+The released generated plans can be re-evaluated deterministically. Regenerating the plans from scratch may not produce identical outputs because it depends on external LLM/API behaviour.
+
+### Reproduction workflow
 
 The reported experiment follows this sequence:
 
@@ -410,4 +531,4 @@ The thesis was completed under the supervision of **Dr Kai Li Lim** and **Dr Che
 
 ## Licence
 
-See [`LICENSE`](LICENSE) for the repository licence. This project extends the TravelPlanner-style codebase; users should also comply with the upstream project's licence and the terms associated with external datasets and APIs.
+See [`LICENSE`](LICENSE) for the repository licence. This project extends the TravelPlanner-style codebase; users should also comply with the upstream project's licence and the terms associated with external datasets, APIs, and separately distributed data/model assets.
