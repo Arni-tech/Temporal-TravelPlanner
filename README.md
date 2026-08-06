@@ -6,7 +6,7 @@ Temporal-TravelPlanner is a research extension of [TravelPlanner](https://github
 
 The project addresses a specific limitation in TravelPlanner-style evaluation: a generated itinerary may contain plausible attractions, meals, transport, and accommodation while still being impractical once the expected time spent at each attraction is included. Temporal-TravelPlanner makes attraction dwell time explicit during planning and adds a duration-budget evaluation layer for measuring day-level and complete-itinerary feasibility.
 
-This repository accompanies the master's thesis:
+This repository accompanies the master's thesis for the course REIT-7842:
 
 > **Temporal-TravelPlanner: Dwell-Time-Aware Itinerary Feasibility Evaluation**  
 > Arnav Negi, The University of Queensland, 2026
@@ -263,7 +263,14 @@ conda activate temporal-travelplanner
 pip install -r requirements.txt
 ```
 
-### 3. Configure required services
+### 3. Download data and model assets
+
+Download the project data/model assets from:
+
+> **[Google Drive: Temporal-TravelPlanner Database and Model Assets](https://drive.google.com/drive/folders/1OvFhq4Anb0jZT8cTbOcEqDfD6wWJ_Sya?usp=drive_link)**
+
+Then place the downloaded files according to the structure described in the `Data and Model Assets` section below.
+### 4. Configure required services
 
 Different stages of the project use external services for LLM generation, place enrichment, routing, or contextual information. Configure the credentials expected by the relevant scripts in a local environment file or shell session.
 
@@ -291,13 +298,26 @@ Download and arrange the original TravelPlanner database according to the upstre
 
 - [OSU-NLP-Group/TravelPlanner](https://github.com/OSU-NLP-Group/TravelPlanner)
 
-### Temporal-TravelPlanner assets
+### Temporal-TravelPlanner data and model assets
 
-The processed dwell-time assets and trained model are distributed separately to keep the source repository lightweight.
+The processed data, trained dwell-time model, and final evaluation outputs are distributed separately to keep the source repository lightweight.
 
-> **Asset release status:** a download link will be added after the project-specific data/model archive is published.
+Download the project assets here:
 
-When available, extract the asset archive into the repository root and preserve the included directory structure.
+> **[Google Drive: Temporal-TravelPlanner Database and Model Assets](https://drive.google.com/drive/folders/1OvFhq4Anb0jZT8cTbOcEqDfD6wWJ_Sya?usp=sharing)**
+
+The Drive folder contains:
+
+- original TravelPlanner-compatible database files used for baseline runs;
+- dwell-aware attraction and restaurant files used by Temporal-TravelPlanner;
+- DBSCAN dwell-label files and selected dwell-model outputs;
+- generated baseline and dwell-aware plans;
+- temporal feasibility and temporal commonsense evaluation outputs; and
+- final logs used for the reported 100-query experiment.
+
+After downloading, place the asset folder in the project root or copy the included folders into the matching repository directories.
+
+Raw Massive-STEPS data is not redistributed in this repository or asset package. It should be obtained from the official source.
 
 ---
 
