@@ -1,3 +1,25 @@
+# Database
+
+The full database is not stored directly in this repository.
+
+Large database files, processed dwell-aware files, trained model outputs, and generated evaluation outputs are distributed through the Google Drive asset package linked in the main README.
+
+After downloading the asset package, copy:
+
+- original TravelPlanner-compatible files into this `database/` folder;
+- dwell-aware attraction files into `database/attractions/`;
+- dwell-aware restaurant files into `database/restaurants/`.
+
+The temporal evaluator expects these files to exist:
+
+```text
+database/validation_ref_info.jsonl
+database/attractions/attractions_google_osm_features_dbscan_dwell.csv
+database/restaurants/restaurants_dbscan_empirical_dwell.csv
+```
+
+Raw Massive-STEPS data is not redistributed here.
+
 ### Attractions
 
 1. **Name**: The name of the attraction.
